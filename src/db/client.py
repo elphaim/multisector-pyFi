@@ -5,5 +5,6 @@ def get_engine(db_url):
   pass
 
 def apply_schema(engine, schema_path):
-  with engine.begin() as conn:
+  with engine.connect() as conn:
     conn.execute(text("schema_path"))
+    conn.commit()
