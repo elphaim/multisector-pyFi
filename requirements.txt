@@ -5,3 +5,4 @@ time
 yfinance
 yfinance.shared
 psycopg2
+sqlalchemy
