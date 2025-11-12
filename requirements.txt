@@ -1,0 +1,7 @@
+pandas
+numpy
+datetime
+time
+yfinance
+yfinance.shared
+psycopg2
