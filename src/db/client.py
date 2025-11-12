@@ -4,7 +4,7 @@ Database client helpers for Postgres (Docker-friendly).
 Usage examples:
     from src.db.client import get_engine, wait_for_db, apply_schema, upsert_df_to_table, get_last_ingested_date
 
-    engine = get_engine("postgresql://demo:demo_pass@localhost:5432/demo_db")
+    engine = get_engine("postgresql://demo:demo_pwd@localhost:5432/demo_db")
     wait_for_db(engine.url, timeout=60)
     apply_schema(engine, "schema/schema.sql")
     count = upsert_df_to_table(engine, df, "raw_prices", pk_cols=["ticker", "trade_date"])
