@@ -1,18 +1,23 @@
+version: "3.8"
+
 services:
-  postgres:
+  db:
     image: postgres:15
-    container_name: demo_postgres
+    container_name: postgres_demo
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-demo}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-demo_pass}
-      POSTGRES_DB: ${POSTGRES_DB:-demo_db}
+      - POSTGRES_USER=demo
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=demo_db
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U demo"]
-      interval: 5s
+      interval: 10s
+      timeout: 5s
       retries: 5
+
 volumes:
-  pgdata:
+  postgres_data:
