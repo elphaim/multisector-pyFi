@@ -5,6 +5,9 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine, URL
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
+log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
 def get_engine(db_url: str) -> Engine:
   """
   Create and return a SQLAlchemy Engine.
