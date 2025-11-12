@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS factor_snapshots (
   PRIMARY KEY (ticker, rebalance_date)
   );
 
-CREATE TABLE backtests (
+CREATE TABLE IF NOT EXISTS backtests (
   run_id UUID PRIMARY KEY,
   name TEXT,
   start_date DATE,
@@ -63,7 +63,7 @@ CREATE TABLE backtests (
   created_at TIMESTAMP DEFAULT now()
   );
 
-CREATE TABLE etl_log (
+CREATE TABLE IF NOT EXISTS etl_log (
   run_id UUID PRIMARY KEY,
   source TEXT,
   table_name TEXT,
