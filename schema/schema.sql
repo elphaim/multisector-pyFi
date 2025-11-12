@@ -1,4 +1,4 @@
-CREATE DATABASE multisector-pyFi
+CREATE DATABASE multisector_pyFi
 
 CREATE TABLE IF NOT EXISTS tickers (
   ticker TEXT PRIMARY KEY, 
