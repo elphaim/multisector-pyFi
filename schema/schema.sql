@@ -1,5 +1,3 @@
-CREATE DATABASE multisector_pyFi;
-
 CREATE TABLE IF NOT EXISTS tickers (
   ticker TEXT PRIMARY KEY, 
   name TEXT, 
@@ -53,16 +51,6 @@ CREATE TABLE IF NOT EXISTS factor_snapshots (
   PRIMARY KEY (ticker, rebalance_date)
   );
 
-CREATE TABLE IF NOT EXISTS backtests (
-  run_id UUID PRIMARY KEY,
-  name TEXT,
-  start_date DATE,
-  end_date DATE,
-  params JSONB,
-  metrics JSONB,
-  created_at TIMESTAMP DEFAULT now()
-  );
-
 CREATE TABLE IF NOT EXISTS etl_log (
   run_id UUID PRIMARY KEY,
   source TEXT,
@@ -73,3 +61,7 @@ CREATE TABLE IF NOT EXISTS etl_log (
   status TEXT,
   notes TEXT
   );
+
+CREATE INDEX IF NOT EXISTS idx_raw_prices_trade_date ON raw_prices (trade_date);
+CREATE INDEX IF NOT EXISTS idx_raw_prices_ticker_trade_date ON raw_prices (ticker, trade_date);
+CREATE INDEX IF NOT EXISTS idx_factor_snapshots_rebalance ON factor_snapshots (rebalance_date);
