@@ -1,11 +1,11 @@
 services:
   postgres:
-    image: postgres:15
+    image: postgres:latest
     container_name: demo_postgres
     environment:
-      POSTGRES_USER: demo
-      POSTGRES_PASSWORD: demo_pass
-      POSTGRES_DB: demo_db
+      POSTGRES_USER: ${POSTGRES_USER:-demo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-demo_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-demo_db}
     ports:
       - "5432:5432"
     volumes:
