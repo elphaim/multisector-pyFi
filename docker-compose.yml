@@ -1,21 +1,30 @@
+# Source - https://stackoverflow.com/a
+# Posted by e741af0d41bc74bf854041f1fbdbf, modified by community. See post 'Timeline' for change history
+# Retrieved 2025-11-12, License - CC BY-SA 4.0
+
 services:
   db:
-    image: postgres:15
     container_name: postgres_demo
-    restart: unless-stopped
+    image: postgres
     environment:
-      - POSTGRES_USER=demo
-      - POSTGRES_PASSWORD=demo_pwd
-      - POSTGRES_DB=demo_db
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pwd
+      PGDATA: /data/postgres
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - db:/data/postgres
+    ports:
+      - "5332:5432"
+    networks:
+      - db
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U demo"]
-      interval: 5s
-      timeout: 5s
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 30s
+      timeout: 10s
       retries: 5
+networks:
+  db:
+    driver: bridge
 
 volumes:
-  postgres_data:
+  db:
