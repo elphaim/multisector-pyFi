@@ -1,10 +1,10 @@
 ticker,name,exchange,gics_sector,gics_industry,currency
-AAA,Alternative Access First Priority CLO Bond ETF,NYSEArca,,,
-ARVBS,,OTC Markets Grey,,,
+AAPL,Apple Inc.,NasdaqGS,Technology,Consumer Electronics,USD
 DRI,"Darden Restaurants, Inc.",NYSE,Consumer Cyclical,Restaurants,USD
 FCX,Freeport-McMoRan Inc.,NYSE,Basic Materials,Copper,USD
 KEYS,"Keysight Technologies, Inc.",NYSE,Technology,Scientific & Technical Instruments,USD
 KMB,Kimberly-Clark Corporation,NasdaqGS,Consumer Defensive,Household & Personal Products,USD
+META,"Meta Platforms, Inc.",NasdaqGS,Communication Services,Internet Content & Information,USD
 MNST,Monster Beverage Corporation,NasdaqGS,Consumer Defensive,Beverages - Non-Alcoholic,USD
 ORA,"Ormat Technologies, Inc.",NYSE,Utilities,Utilities - Renewable,USD
 TROW,"T. Rowe Price Group, Inc.",NasdaqGS,Financial Services,Asset Management,USD
