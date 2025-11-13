@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS tickers (
   exchange TEXT, 
   gics_sector TEXT, 
   gics_industry TEXT,
-  currency TEXT
+  currency TEXT,
+  source TEXT
   );
 
 CREATE TABLE IF NOT EXISTS raw_prices (
