@@ -4,10 +4,9 @@ Database client helpers for Postgres (Docker-friendly).
 Usage examples:
     from src.db.client import get_engine, wait_for_db, apply_schema, upsert_df_to_table, get_last_ingested_date
 
-    engine = get_engine("postgresql://demo:demo_pwd@localhost:5432/demo_db")
+    engine = get_engine("postgresql://postgres:pwd@localhost:5332/postgres")
     wait_for_db(engine.url, timeout=60)
     apply_schema(engine, "schema/schema.sql")
-    count = upsert_df_to_table(engine, df, "raw_prices", pk_cols=["ticker", "trade_date"])
 """
 
 import time
@@ -25,12 +24,12 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 def get_engine(db_url: str) -> Engine:
-  """
-  Create and return a SQLAlchemy Engine.
-  Example db_url: postgresql://user:pass@localhost:5432/dbname
-  """
-  engine = create_engine(db_url)
-  return engine
+    """
+    Create and return a SQLAlchemy Engine.
+    Demo database URL: postgresql://postgres:pwd@localhost:5332/postgres (as defined in docker-compose.yml)
+    """
+    engine = create_engine(db_url)
+    return engine
 
 def wait_for_db(db_url: str, timeout: int = 60, interval: float = 1.0) -> bool:
     """
@@ -53,20 +52,20 @@ def wait_for_db(db_url: str, timeout: int = 60, interval: float = 1.0) -> bool:
 
 
 def apply_schema(engine: Engine, schema_path: str) -> None:
-  """
-  Apply SQL schema file to the connected database.
-  - Reads the schema file and executes statements in a single transaction.
-  - Intended for Postgres; keep schema compatible with Postgres.
-  """
-  with open(schema_path, "r", encoding="utf8") as f:
-    sql = f.read()
-  
-  # Split by semicolon and execute statements sequentially to improve error visibility.
-  stmts = [s.strip() for s in sql.split(";") if s.strip()]
-  with engine.begin() as conn:
-    for stmt in stmts:
-      conn.execute(text(stmt))
-  log.info("Applied schema from %s", schema_path)
+    """
+    Apply SQL schema file to the connected PostgreSQL database.
+    Reads the schema file and executes statements in a single transaction.
+    """
+    with open(schema_path, "r", encoding="utf8") as f:
+        sql = f.read()
+        
+    # Split by semicolon and execute statements sequentially to improve error visibility.
+    stmts = [s.strip() for s in sql.split(";") if s.strip()]
+    with engine.begin() as conn:
+        for stmt in stmts:
+            conn.execute(text(stmt))
+            log.info("Applied schema from %s", schema_path)
+
 
 def upsert_df_to_table(engine: Engine, df: pd.DataFrame, table_name: str, pk_cols: List[str]) -> int:
     """
@@ -116,6 +115,7 @@ def upsert_df_to_table(engine: Engine, df: pd.DataFrame, table_name: str, pk_col
         except SQLAlchemyError:
             log.info("Upsert to %s completed (row count unavailable)", table_name)
     return len(df)
+
 
 def get_last_ingested_date(engine: Engine, table_name: str, source: Optional[str] = None) -> Optional[str]:
     """
