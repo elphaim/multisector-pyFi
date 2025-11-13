@@ -1,11 +1,11 @@
-ticker,name,exchange,gics_sector,gics_industry
-AAA,Alternative Access First Priority CLO Bond ETF,NYSEArca,,
-ARVBS,,OTC Markets Grey,,
-DRI,"Darden Restaurants, Inc.",NYSE,Consumer Cyclical,Restaurants
-FCX,Freeport-McMoRan Inc.,NYSE,Basic Materials,Copper
-KEYS,"Keysight Technologies, Inc.",NYSE,Technology,Scientific & Technical Instruments
-KMB,Kimberly-Clark Corporation,NasdaqGS,Consumer Defensive,Household & Personal Products
-MNST,Monster Beverage Corporation,NasdaqGS,Consumer Defensive,Beverages - Non-Alcoholic
-ORA,"Ormat Technologies, Inc.",NYSE,Utilities,Utilities - Renewable
-TROW,"T. Rowe Price Group, Inc.",NasdaqGS,Financial Services,Asset Management
-TTE,TotalEnergies SE,NYSE,Energy,Oil & Gas Integrated
+ticker,name,exchange,gics_sector,gics_industry,currency
+AAA,Alternative Access First Priority CLO Bond ETF,NYSEArca,,,
+ARVBS,,OTC Markets Grey,,,
+DRI,"Darden Restaurants, Inc.",NYSE,Consumer Cyclical,Restaurants,USD
+FCX,Freeport-McMoRan Inc.,NYSE,Basic Materials,Copper,USD
+KEYS,"Keysight Technologies, Inc.",NYSE,Technology,Scientific & Technical Instruments,USD
+KMB,Kimberly-Clark Corporation,NasdaqGS,Consumer Defensive,Household & Personal Products,USD
+MNST,Monster Beverage Corporation,NasdaqGS,Consumer Defensive,Beverages - Non-Alcoholic,USD
+ORA,"Ormat Technologies, Inc.",NYSE,Utilities,Utilities - Renewable,USD
+TROW,"T. Rowe Price Group, Inc.",NasdaqGS,Financial Services,Asset Management,USD
+TTE,TotalEnergies SE,NYSE,Energy,Oil & Gas Integrated,USD
