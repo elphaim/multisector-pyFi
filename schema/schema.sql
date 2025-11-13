@@ -25,12 +25,10 @@ CREATE TABLE IF NOT EXISTS raw_fundamentals (
   ticker TEXT NOT NULL,
   report_date DATE NOT NULL,
   market_cap NUMERIC, 
-  trailing_pe NUMERIC, 
-  eps_basic NUMERIC, 
-  eps_diluted NUMERIC,
+  eps_ttm NUMERIC, 
   revenue NUMERIC, 
-  income NUMERIC,
-  dividend_yield NUMERIC, 
+  net_income NUMERIC,
+  total_equity NUMERIC,
   source TEXT,
   PRIMARY KEY (ticker, report_date)
   );
@@ -40,15 +38,19 @@ CREATE TABLE IF NOT EXISTS factor_snapshots (
   rebalance_date DATE NOT NULL,
   mom_3m NUMERIC,
   mom_6m NUMERIC,
+  mom_12m NUMERIC,
   vol_1m NUMERIC,
   vol_3m NUMERIC,
   size NUMERIC,
   pe_ratio NUMERIC,
+  roe NUMERIC,
   net_margin NUMERIC,
-  profit_margin NUMERIC, 
   gics_sector TEXT,
   mom_3m_zsec NUMERIC,
   mom_6m_zsec NUMERIC,
+  mom_12m_zsec NUMERIC,
+  vol_1m_zsec NUMERIC,
+  vol_3m_zsec NUMERIC,
   PRIMARY KEY (ticker, rebalance_date)
   );
 
