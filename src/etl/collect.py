@@ -71,10 +71,10 @@ def ingest_prices_from_csv(engine, csv_path: str, source: str = "csv") -> int:
 def ingest_fundamentals_from_csv(engine, csv_path: str, source: str = "csv") -> int:
     """
     Read a CSV of fundamentals and upsert into raw_fundamentals.
-    Expected columns: ticker(pk), report_date(pk), market_cap, trailing_pe, eps_diluted, revenue, income, dividend_yield, source(optional)
+    Expected columns: ticker(pk), report_date(pk), market_cap, eps_ttm, revenue, net_income, total_equity, source(optional)
     """
     df = _read_csv(csv_path)
-    required = {"ticker", "report_date", "market_cap", "trailing_pe", "eps_diluted", "revenue", "income", "dividend_yield"}
+    required = {"ticker", "report_date", "market_cap", "eps_ttm", "revenue", "net_income", "total_equity"}
     if not required.issubset(set(df.columns)):
         raise ValueError(f"fundamentals CSV must contain columns: {required}. Found: {list(df.columns)}")
 
@@ -82,7 +82,7 @@ def ingest_fundamentals_from_csv(engine, csv_path: str, source: str = "csv") -> 
     if "source" not in df.columns:
         df["source"] = source
 
-    cols = ["ticker", "report_date", "market_cap", "trailing_pe", "eps_diluted", "revenue", "income", "dividend_yield", "source"]
+    cols = ["ticker", "report_date", "market_cap", "eps_ttm", "revenue", "net_income", "total_equity", "source"]
     cols = [c for c in cols if c in df.columns]
     df = df[cols]
 
