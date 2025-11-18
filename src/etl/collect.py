@@ -6,7 +6,6 @@ Provides:
 - ingest_prices_from_csv(engine, csv_path, source)
 - ingest_fundamentals_from_csv(engine, csv_path, source)
 - ingest_tickers_from_csv(engine, csv_path, source)
-- (optional) fetch_prices_yfinance(tickers, start, end)  -- lightweight helper, only used when yfinance installed
 - CLI entrypoint to seed sample files into the DB (uses src.db.client.upsert_df_to_table)
 
 Usage (seed sample CSVs):
@@ -64,7 +63,7 @@ def ingest_prices_from_csv(engine, csv_path: str, source: str = "csv") -> int:
     df = df[cols]
 
     count = upsert_df_to_table(engine, df, "raw_prices", pk_cols=["ticker", "trade_date"])
-    log.info("Ingested prices rows: %d", len(df))
+    log.info(" Ingested prices rows: %d", len(df))
     return count
 
 
@@ -127,38 +126,7 @@ def seed_from_csv(engine, prices_path: Optional[str], fundamentals_path: Optiona
     return results
 
 
-# Optional lightweight yfinance helper. yfinance is an optional dependency; guard the import.
-def fetch_prices_yfinance(tickers, start: str, end: str) -> pd.DataFrame:
-    """
-    Fetch daily prices from yfinance and return a DataFrame in the same shape as sample_prices.csv:
-    ticker, trade_date, open, high, low, close, adj_close, volume, source
-    Requires yfinance to be installed.
-    """
-    try:
-        import yfinance as yf
-    except Exception as e:
-        raise RuntimeError("yfinance is not installed; install with `pip install yfinance` to use this helper") from e
-
-    out_rows = []
-    for t in tickers:
-        hist = yf.download(t, start=start, end=end, progress=False, auto_adjust=False)
-        if hist is None or hist.empty:
-            continue
-        hist = hist.reset_index()
-        hist["Ticker"] = t
-        hist = hist.rename(columns={
-            "Date": "trade_date", "Open": "open", "High": "high", "Low": "low",
-            "Close": "close", "Adj Close": "adj_close", "Volume": "volume"
-        })
-        hist["trade_date"] = pd.to_datetime(hist["trade_date"]).dt.date
-        hist["ticker"] = t
-        cols = ["ticker", "trade_date", "open", "high", "low", "close", "adj_close", "volume"]
-        hist = hist[[c for c in cols if c in hist.columns]]
-        hist["source"] = "yfinance"
-        out_rows.append(hist)
-    if not out_rows:
-        return pd.DataFrame(columns=["ticker", "trade_date", "open", "high", "low", "close", "adj_close", "volume", "source"])
-    return pd.concat(out_rows, ignore_index=True)
+# -------- CLI -------------------------------------------------
 
 
 def _build_engine_and_wait(db_url: str, wait_seconds: int = 30):
