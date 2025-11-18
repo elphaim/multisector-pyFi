@@ -1,11 +1,101 @@
 ticker,name,exchange,gics_sector,gics_industry,currency
-AAPL,Apple Inc.,NasdaqGS,Technology,Consumer Electronics,USD
-DRI,"Darden Restaurants, Inc.",NYSE,Consumer Cyclical,Restaurants,USD
-FCX,Freeport-McMoRan Inc.,NYSE,Basic Materials,Copper,USD
-KEYS,"Keysight Technologies, Inc.",NYSE,Technology,Scientific & Technical Instruments,USD
-KMB,Kimberly-Clark Corporation,NasdaqGS,Consumer Defensive,Household & Personal Products,USD
-META,"Meta Platforms, Inc.",NasdaqGS,Communication Services,Internet Content & Information,USD
-MNST,Monster Beverage Corporation,NasdaqGS,Consumer Defensive,Beverages - Non-Alcoholic,USD
+ABT,Abbott Laboratories,NYSE,Healthcare,Medical Devices,USD
+ACA,"Arcosa, Inc.",NYSE,Industrials,Engineering & Construction,USD
+ADM,Archer-Daniels-Midland Company,NYSE,Consumer Defensive,Farm Products,USD
+AEE,Ameren Corporation,NYSE,Utilities,Utilities - Regulated Electric,USD
+AIG,"American International Group, Inc.",NYSE,Financial Services,Insurance - Diversified,USD
+ALB,Albemarle Corporation,NYSE,Basic Materials,Specialty Chemicals,USD
+ALCBX,ALPS/Smith Balanced Opportunity C,Nasdaq,,,
+ALL,The Allstate Corporation,NYSE,Financial Services,Insurance - Property & Casualty,USD
+AMGN,Amgen Inc.,NasdaqGS,Healthcare,Drug Manufacturers - General,USD
+AMT,American Tower Corporation,NYSE,Real Estate,REIT - Specialty,USD
+APH,Amphenol Corporation,NYSE,Technology,Electronic Components,USD
+AVGO,Broadcom Inc.,NasdaqGS,Technology,Semiconductors,USD
+AZO,"AutoZone, Inc.",NYSE,Consumer Cyclical,Auto Parts,USD
+BA,The Boeing Company,NYSE,Industrials,Aerospace & Defense,USD
+BG,Bunge Global SA,NYSE,Consumer Defensive,Farm Products,USD
+BX,Blackstone Inc.,NYSE,Financial Services,Asset Management,USD
+CFG,"Citizens Financial Group, Inc.",NYSE,Financial Services,Banks - Regional,USD
+CFI,,YHD,,,
+CMCSA,Comcast Corporation,NasdaqGS,Communication Services,Telecom Services,USD
+CNC,Centene Corporation,NYSE,Healthcare,Healthcare Plans,USD
+COO,"The Cooper Companies, Inc.",NasdaqGS,Healthcare,Medical Instruments & Supplies,USD
+CPAY,"Corpay, Inc.",NYSE,Technology,Software - Infrastructure,USD
+CRI,"Carter's, Inc.",NYSE,Consumer Cyclical,Apparel Retail,USD
+CRTO,Criteo S.A.,NasdaqGS,Communication Services,Advertising Agencies,USD
+CTRA,Coterra Energy Inc.,NYSE,Energy,Oil & Gas E&P,USD
+D,"Dominion Energy, Inc.",NYSE,Utilities,Utilities - Regulated Electric,USD
+DEC,Diversified Energy Company PLC,NYSE,Energy,Oil & Gas Integrated,USD
+DELL,Dell Technologies Inc.,NYSE,Technology,Computer Hardware,USD
+DHI,"D.R. Horton, Inc.",NYSE,Consumer Cyclical,Residential Construction,USD
+DIS,The Walt Disney Company,NYSE,Communication Services,Entertainment,USD
+DOC,"Healthpeak Properties, Inc.",NYSE,Real Estate,REIT - Healthcare Facilities,USD
+EMR,Emerson Electric Co.,NYSE,Industrials,Specialty Industrial Machinery,USD
+EQR,Equity Residential,NYSE,Real Estate,REIT - Residential,USD
+EXPD,"Expeditors International of Washington, Inc.",NYSE,Industrials,Integrated Freight & Logistics,USD
+EXR,Extra Space Storage Inc.,NYSE,Real Estate,REIT - Industrial,USD
+FICO,Fair Isaac Corporation,NYSE,Technology,Software - Application,USD
+FR,"First Industrial Realty Trust, Inc.",NYSE,Real Estate,REIT - Industrial,USD
+GAM,"General American Investors Company, Inc.",NYSE,Financial Services,Asset Management,USD
+GE,GE Aerospace,NYSE,Industrials,Aerospace & Defense,USD
+GNFT,Genfit S.A.,NasdaqGS,Healthcare,Biotechnology,EUR
+GNRC,Generac Holdings Inc.,NYSE,Industrials,Specialty Industrial Machinery,USD
+GPC,Genuine Parts Company,NYSE,Consumer Cyclical,Auto Parts,USD
+GRMN,Garmin Ltd.,NYSE,Technology,Scientific & Technical Instruments,USD
+HD,"The Home Depot, Inc.",NYSE,Consumer Cyclical,Home Improvement Retail,USD
+HIG,"The Hartford Insurance Group, Inc.",NYSE,Financial Services,Insurance - Property & Casualty,USD
+HPQ,HP Inc.,NYSE,Technology,Computer Hardware,USD
+IBM,International Business Machines Corporation,NYSE,Technology,Information Technology Services,USD
+ITP,"IT Tech Packaging, Inc.",NYSE American,Basic Materials,Paper & Paper Products,USD
+ITW,Illinois Tool Works Inc.,NYSE,Industrials,Specialty Industrial Machinery,USD
+K,Kellanova,NYSE,Consumer Defensive,Packaged Foods,USD
+KDP,Keurig Dr Pepper Inc.,NasdaqGS,Consumer Defensive,Beverages - Non-Alcoholic,USD
+KIM,Kimco Realty Corporation,NYSE,Real Estate,REIT - Retail,USD
+KKR,KKR & Co. Inc.,NYSE,Financial Services,Asset Management,USD
+KLAC,KLA Corporation,NasdaqGS,Technology,Semiconductor Equipment & Materials,USD
+LH,Labcorp Holdings Inc.,NYSE,Healthcare,Diagnostics & Research,USD
+LI,Li Auto Inc.,NasdaqGS,Consumer Cyclical,Auto Manufacturers,CNY
+LMT,Lockheed Martin Corporation,NYSE,Industrials,Aerospace & Defense,USD
+LNT,Alliant Energy Corporation,NasdaqGS,Utilities,Utilities - Regulated Electric,USD
+MAS,Masco Corporation,NYSE,Industrials,Building Products & Equipment,USD
+MET,"MetLife, Inc.",NYSE,Financial Services,Insurance - Life,USD
+MGM,MGM Resorts International,NYSE,Consumer Cyclical,Resorts & Casinos,USD
+MMM,3M Company,NYSE,Industrials,Conglomerates,USD
+NCLH,Norwegian Cruise Line Holdings Ltd.,NYSE,Consumer Cyclical,Travel Services,USD
+NEE,"NextEra Energy, Inc.",NYSE,Utilities,Utilities - Regulated Electric,USD
+NI,NiSource Inc.,NYSE,Utilities,Utilities - Regulated Gas,USD
+NTAP,"NetApp, Inc.",NasdaqGS,Technology,Software - Infrastructure,USD
+ON,ON Semiconductor Corporation,NasdaqGS,Technology,Semiconductors,USD
 ORA,"Ormat Technologies, Inc.",NYSE,Utilities,Utilities - Renewable,USD
+PCAR,PACCAR Inc,NasdaqGS,Industrials,Farm & Heavy Construction Machinery,USD
+PHM,"PulteGroup, Inc.",NYSE,Consumer Cyclical,Residential Construction,USD
+RJF,"Raymond James Financial, Inc.",NYSE,Financial Services,Asset Management,USD
+RL,Ralph Lauren Corporation,NYSE,Consumer Cyclical,Apparel Manufacturing,USD
+ROK,"Rockwell Automation, Inc.",NYSE,Industrials,Specialty Industrial Machinery,USD
+ROST,"Ross Stores, Inc.",NasdaqGS,Consumer Cyclical,Apparel Retail,USD
+RTX,RTX Corporation,NYSE,Industrials,Aerospace & Defense,USD
+SAN,"Banco Santander, S.A.",NYSE,Financial Services,Banks - Diversified,EUR
+SBUX,Starbucks Corporation,NasdaqGS,Consumer Cyclical,Restaurants,USD
+SPGI,S&P Global Inc.,NYSE,Financial Services,Financial Data & Stock Exchanges,USD
+SRE,Sempra,NYSE,Utilities,Utilities - Diversified,USD
+STT,State Street Corporation,NYSE,Financial Services,Asset Management,USD
+SWK,"Stanley Black & Decker, Inc.",NYSE,Industrials,Tools & Accessories,USD
+TER,"Teradyne, Inc.",NasdaqGS,Technology,Semiconductor Equipment & Materials,USD
+TFC,Truist Financial Corporation,NYSE,Financial Services,Banks - Regional,USD
+TJX,"The TJX Companies, Inc.",NYSE,Consumer Cyclical,Apparel Retail,USD
 TROW,"T. Rowe Price Group, Inc.",NasdaqGS,Financial Services,Asset Management,USD
 TTE,TotalEnergies SE,NYSE,Energy,Oil & Gas Integrated,USD
+TTWO,"Take-Two Interactive Software, Inc.",NasdaqGS,Communication Services,Electronic Gaming & Multimedia,USD
+UAL,"United Airlines Holdings, Inc.",NasdaqGS,Industrials,Airlines,USD
+UBER,"Uber Technologies, Inc.",NYSE,Technology,Software - Application,USD
+URI,"United Rentals, Inc.",NYSE,Industrials,Rental & Leasing Services,USD
+USB,U.S. Bancorp,NYSE,Financial Services,Banks - Regional,USD
+VAC,Marriott Vacations Worldwide Corporation,NYSE,Consumer Cyclical,Resorts & Casinos,USD
+VRSN,"VeriSign, Inc.",NasdaqGS,Technology,Software - Infrastructure,USD
+VST,Vistra Corp.,NYSE,Utilities,Utilities - Independent Power Producers,USD
+AB,AllianceBernstein Holding L.P.,NYSE,Financial Services,Asset Management,USD
+ABEO,Abeona Therapeutics Inc.,NasdaqCM,Healthcare,Biotechnology,USD
+WMT,Walmart Inc.,NYSE,Consumer Defensive,Discount Stores,USD
+WST,"West Pharmaceutical Services, Inc.",NYSE,Healthcare,Medical Instruments & Supplies,USD
+XEL,Xcel Energy Inc.,NasdaqGS,Utilities,Utilities - Regulated Electric,USD
+XYZ,"Block, Inc.",NYSE,Technology,Software - Infrastructure,USD
