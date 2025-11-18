@@ -5,8 +5,10 @@ Loads environment variables from a .env file (if present) and exposes a small Co
 Requires python-dotenv (pip install python-dotenv).
 """
 
+#from __future__ import annotations
 import os
 from dataclasses import dataclass
+#from typing import Optional
 from dotenv import load_dotenv
 
 # Load .env from repo root if present
