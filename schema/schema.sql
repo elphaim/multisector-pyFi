@@ -46,13 +46,30 @@ CREATE TABLE IF NOT EXISTS factor_snapshots (
   roe NUMERIC,
   net_margin NUMERIC,
   gics_sector TEXT,
-  mom_3m_zsec NUMERIC,
-  mom_6m_zsec NUMERIC,
-  mom_12m_zsec NUMERIC,
-  vol_1m_zsec NUMERIC,
-  vol_3m_zsec NUMERIC,
   PRIMARY KEY (ticker, rebalance_date)
   );
+
+CREATE TABLE IF NOT EXISTS backtests (
+  run_id TEXT NOT NULL,
+  name TEXT,
+  start_date DATE,
+  end_date DATE,
+  params JSONB,
+  metrics JSONB,
+  created_at TIMESTAMP DEFAULT now()
+  );
+
+CREATE TABLE IF NOT EXISTS positions (
+  run_id TEXT NOT NULL,
+  as_of DATE NOT NULL,
+  ticker TEXT NOT NULL,
+  weight NUMERIC,
+  entry_price NUMERIC,
+  exit_price NUMERIC,
+  pnl NUMERIC,
+  PRIMARY KEY (run_id, as_of, ticker)
+  );
+
 
 CREATE TABLE IF NOT EXISTS etl_log (
   run_id UUID PRIMARY KEY,
@@ -68,3 +85,5 @@ CREATE TABLE IF NOT EXISTS etl_log (
 CREATE INDEX IF NOT EXISTS idx_raw_prices_trade_date ON raw_prices (trade_date);
 CREATE INDEX IF NOT EXISTS idx_raw_prices_ticker_trade_date ON raw_prices (ticker, trade_date);
 CREATE INDEX IF NOT EXISTS idx_factor_snapshots_rebalance ON factor_snapshots (rebalance_date);
+CREATE INDEX IF NOT EXISTS idx_positions_run_id ON positions (run_id);
+CREATE INDEX IF NOT EXISTS idx_backtests_created_at ON backtests (created_at);
