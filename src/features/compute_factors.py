@@ -4,7 +4,6 @@ Compute factor snapshots and upsert into factor_snapshots table.
 Features implemented:
 - momentum_3m, momentum_6m, momentum_12m (total return using adj_close)
 - vol_1m, vol_3m (annualized rolling std of daily returns)
-- corresponding sector zscores (z = (x - mean)/std)
 - size (log market cap)
 - pe_ratio (price / eps_ttm when eps_ttm available)
 - roe (net_income / total_equity when available)
@@ -279,19 +278,10 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
     except Exception:
         log.debug("Could not attach sector mapping; continuing without it")
 
-    def z(x):
-        return (x - x.mean()) / x.std()
-        
-    df_out['mom_3m_zsec'] = df_out.groupby('gics_sector')['mom_3m'].transform(z)
-    df_out['mom_6m_zsec'] = df_out.groupby('gics_sector')['mom_6m'].transform(z)
-    df_out['mom_12m_zsec'] = df_out.groupby('gics_sector')['mom_12m'].transform(z)
-    df_out['vol_1m_zsec'] = df_out.groupby('gics_sector')['vol_1m'].transform(z)
-    df_out['vol_3m_zsec'] = df_out.groupby('gics_sector')['vol_3m'].transform(z)
-
     # reorder columns to match schema expectations
     cols_order = ["ticker", "rebalance_date", "mom_3m", "mom_6m", "mom_12m",
-                  "vol_1m", "vol_3m", "size", "pe_ratio", "roe", "net_margin", "gics_sector", 
-                  'mom_3m_zsec', 'mom_6m_zsec', 'mom_12m_zsec', 'vol_1m_zsec', 'vol_3m_zsec']
+                  "vol_1m", "vol_3m", "size", "pe_ratio", "roe", "net_margin", "gics_sector"
+                  ]
     cols = [c for c in cols_order if c in df_out.columns]
     df_out = df_out[cols]
     return df_out
