@@ -4,3 +4,5 @@ numpy
 datetime
 psycopg2
 sqlalchemy
+matplotlib
+requests
