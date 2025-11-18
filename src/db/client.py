@@ -6,7 +6,7 @@ Usage examples:
 
     engine = get_engine("postgresql://postgres:pwd@localhost:5332/postgres")
     wait_for_db(engine.url, timeout=60)
-    apply_schema(engine, "schema/schema.sql")
+    apply_schema(engine, "schema/schema.sql")    
 """
 
 import time
@@ -17,11 +17,12 @@ import pandas as pd
 from typing import List, Optional
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine, URL
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
 
 def get_engine(db_url: str) -> Engine:
     """
@@ -30,6 +31,7 @@ def get_engine(db_url: str) -> Engine:
     """
     engine = create_engine(db_url)
     return engine
+
 
 def wait_for_db(db_url: str, timeout: int = 60, interval: float = 1.0) -> bool:
     """
@@ -42,11 +44,11 @@ def wait_for_db(db_url: str, timeout: int = 60, interval: float = 1.0) -> bool:
             eng = create_engine(db_url)
             with eng.connect() as conn:
                 conn.execute(text("SELECT 1"))
-            log.info("Database reachable at %s", db_url)
+            log.info(" Database reachable at %s", db_url)
             return True
         except OperationalError as e:
             if time.time() - start > timeout:
-                log.error("Timed out waiting for DB: %s", e)
+                log.error(" Timed out waiting for DB: %s", e)
                 return False
             time.sleep(interval)
 
@@ -74,10 +76,10 @@ def upsert_df_to_table(engine: Engine, df: pd.DataFrame, table_name: str, pk_col
       1. Write df to a temporary staging table (stg_<table>_<uuid>).
       2. Run an INSERT ... SELECT FROM staging ON CONFLICT (pk...) DO UPDATE SET ...
       3. Drop staging table.
-    Returns number of rows processed from staging (approx).
+    Returns number of rows processed from staging.
     """
     if df is None or df.empty:
-        log.info("Empty DataFrame for upsert to %s, nothing to do.", table_name)
+        log.info(" Empty DataFrame for upsert to %s, nothing to do.", table_name)
         return 0
 
     tmp_table = f"stg_{table_name}_{uuid.uuid4().hex[:8]}"
@@ -111,15 +113,15 @@ def upsert_df_to_table(engine: Engine, df: pd.DataFrame, table_name: str, pk_col
         try:
             res = conn.execute(text(f"SELECT COUNT(1) FROM \"{table_name}\""))
             total_after = int(res.scalar() or 0)
-            log.info("Upsert to %s completed; target table now has %d rows (total)", table_name, total_after)
+            log.info(" Upsert to %s completed; target table now has %d rows (total)", table_name, total_after)
         except SQLAlchemyError:
-            log.info("Upsert to %s completed (row count unavailable)", table_name)
+            log.info(" Upsert to %s completed (row count unavailable)", table_name)
     return len(df)
 
 
 def get_last_ingested_date(engine: Engine, table_name: str, source: Optional[str] = None) -> Optional[str]:
     """
-    Return the latest date value for common date columns (trade_date or report_date) for a given table.
+    Return the latest date value for common date columns (trade_date, report_date or rebalance_date) for a given table.
     If source is provided, it will add WHERE source = :source when the column exists.
     Returns string representation of the max date or None if not found.
     """
