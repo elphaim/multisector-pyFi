@@ -1,17 +1,15 @@
 """
 Plotting utilities for backtest results.
-
 Functions:
-- plot_equity_curve(df)
-- plot_drawdown(df)
-- plot_turnover(df)
+    - plot_equity_curve(df)
+    - plot_drawdown(df)
+    - plot_exposure(df)
 
 Input: DataFrame with daily backtest results, typically from run_backtest()
 Expected columns:
-- 'cum_return': cumulative return
-- 'pnl': daily return
-- 'gross_exposure' (optional)
-- 'net_exposure' (optional)
+    - 'cum_return': cumulative return
+    - 'pnl': daily return
+    - 'net_exposure' (optional)
 """
 
 import matplotlib.pyplot as plt
@@ -46,9 +44,9 @@ def plot_drawdown(df: pd.DataFrame, ax=None):
     return ax
 
 
-def plot_turnover(df: pd.DataFrame, ax=None):
+def plot_exposure(df: pd.DataFrame, ax=None):
     """
-    Plot net exposure or turnover if available.
+    Plot net exposure if available.
     """
     if "net_exposure" not in df.columns:
         print("No net_exposure column found; skipping plot.")
@@ -64,11 +62,11 @@ def plot_turnover(df: pd.DataFrame, ax=None):
 
 def plot_all(df: pd.DataFrame):
     """
-    Plot equity, drawdown, and turnover in one figure.
+    Plot equity, drawdown, and exposure in one figure.
     """
     fig, axes = plt.subplots(3, 1, figsize=(12, 9), sharex=True, gridspec_kw={"height_ratios": [2, 1, 1]})
     plot_equity_curve(df, ax=axes[0])
     plot_drawdown(df, ax=axes[1])
-    plot_turnover(df, ax=axes[2])
+    plot_exposure(df, ax=axes[2])
     plt.tight_layout()
     plt.show()

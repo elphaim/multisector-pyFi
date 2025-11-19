@@ -1,9 +1,8 @@
 """
 Ingestion CLI wrapper.
-
 Uses src.etl.collect helpers to ingest one or more CSVs into the demo DB and logs the run into etl_log.
 Example:
-  python -m src.etl.ingest --db-url "postgresql://postgres:pwd@localhost:5332/postgres" \
+    python -m src.etl.ingest --db-url "postgresql://postgres:pwd@localhost:5332/postgres" \
     --prices data/sample_prices.csv --fundamentals data/sample_fundamentals.csv --tickers data/sample_tickers.csv --source sample_csv
 """
 

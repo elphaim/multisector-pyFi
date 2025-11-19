@@ -1,12 +1,11 @@
 """
 Scoring module.
-
 Reads factor_snapshots for a given rebalance_date and computes a score per ticker.
 Supports:
-- Single-factor scoring
-- Equal-weight multi-factor scoring
-- IC-weighted scoring (to be implemented)
-- Sector-neutral z-score normalization
+    - Single-factor scoring
+    - Equal-weight multi-factor scoring
+    - IC-weighted scoring (to be implemented)
+    - Sector-neutral z-score normalization
 
 Usage:
     from src.backtest.scoring import score_tickers
@@ -23,6 +22,8 @@ from src.db.client import get_engine
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
+
+# ----- helper utilities ----------------------------------------------------
 
 def _load_factors(engine, rebalance_date: str, factors: List[str]) -> pd.DataFrame:
     """
@@ -52,6 +53,8 @@ def _sector_zscore(df: pd.DataFrame, factor: str) -> pd.Series:
     return df.groupby("gics_sector")[factor].transform(zscore)
 
 
+# ----- scoring function ----------------------------------------------------
+
 def score_tickers(engine, rebalance_date: str, factors: List[str], method: str = "equal_weight", sector_neutral: bool = True) -> pd.DataFrame:
     """
     Compute score per ticker for a given rebalance_date using selected factors.
@@ -64,7 +67,7 @@ def score_tickers(engine, rebalance_date: str, factors: List[str], method: str =
     """
     df = _load_factors(engine, rebalance_date, factors)
     if df.empty:
-        log.warning("No factor data found for %s", rebalance_date)
+        log.warning(" No factor data found for %s", rebalance_date)
         return pd.DataFrame(columns=["ticker", "score"])
 
     df = df.set_index("ticker")
@@ -81,9 +84,6 @@ def score_tickers(engine, rebalance_date: str, factors: List[str], method: str =
         df["score"] = df[[f + "_z" for f in factors]].mean(axis=1)
     elif method == "single":
         df["score"] = df[factors[0] + "_z"]
-    elif method == "custom":
-        # Placeholder: implement IC-weighted or regression-based scoring
-        df["score"] = df[[f + "_z" for f in factors]].mean(axis=1)
     else:
         raise ValueError(f"Unknown scoring method: {method}")
 

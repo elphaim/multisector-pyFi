@@ -1,13 +1,14 @@
 """
 Weighting strategies for converting scores into portfolio weights.
 Supports:
-- Equal-weight long-short (top/bottom quantiles)
-- Volatility-adjusted weights
+    - Equal-weight long-short (top/bottom quantiles)
+    - Volatility-adjusted weights
 """
 
 import pandas as pd
 
 from src.backtest.scoring import _load_factors
+
 
 def equal_weight_long_short(scores: pd.DataFrame, long_pct=0.1, short_pct=0.1) -> pd.DataFrame:
     """
@@ -44,7 +45,7 @@ def volatility_adjusted_weights(scores: pd.DataFrame, vol: pd.Series, target_gro
     """
     Assign weights proportional to score / volatility.
     vol: Series indexed by ticker with annualized volatility.
-    - normalization: one of {"gross", "signed", "unit"}:
+    - normalization: one of {"gross", "unit"}:
         - "gross": scale so sum(abs(w)) == target_gross (default)
         - "unit": scale so sum(w) == 1
 

@@ -4,7 +4,7 @@ Compute factor snapshots and upsert into factor_snapshots table.
 Features implemented:
 - momentum_3m, momentum_6m, momentum_12m (total return using adj_close)
 - vol_1m, vol_3m (annualized rolling std of daily returns)
-- size (log market cap)
+- size (log of market cap)
 - pe_ratio (price / eps_ttm when eps_ttm available)
 - roe (net_income / total_equity when available)
 - net_margin (net_income / revenue when available)
@@ -161,15 +161,15 @@ def build_price_panel(prices: pd.DataFrame) -> pd.DataFrame:
     return panel
 
 
-def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: dict = None, fund_lag_days: int = 30) -> pd.DataFrame:
+def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: dict = None, fund_lag_days: int = 30) -> pd.DataFrame: # type: ignore
     """
     Compute factor snapshot for the rebalance_date (string "YYYY-MM-DD").
     Returns DataFrame with one row per ticker and the factor columns.
     """
-    log.info("Loading prices up to %s", rebalance_date)
+    log.info(" Loading prices up to %s", rebalance_date)
     prices = _load_prices(engine, rebalance_date)
     if prices.empty:
-        log.warning("No prices found up to %s", rebalance_date)
+        log.warning(" No prices found up to %s", rebalance_date)
         return pd.DataFrame()
 
     price_panel = build_price_panel(prices)  # index=ticker, cols=dates
@@ -187,7 +187,7 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
     fund_wide = _latest_fundamentals_for_date(fund_df, pd.to_datetime(rebalance_date), lag_days=fund_lag_days)
 
     out_rows = []
-    log.info("Computing factors for %d tickers", len(price_panel))
+    log.info(" Computing factors for %d tickers", len(price_panel))
     for ticker, row in price_panel.iterrows():
         # row is adj_close series indexed by date (DatetimeIndex sorted ascending)
         adj = row.dropna()
@@ -213,7 +213,7 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
         roe = None
         net_margin = None
         if ticker in fund_wide.index:
-            f = fund_wide.loc[ticker]
+            f = fund_wide.loc[ticker] # type: ignore
             try:
                 mc = f.get("market_cap", None)
                 if mc is not None and mc > 1:
@@ -242,6 +242,7 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
 
             # net_margin = net_income / revenue
             try:
+                ni = f.get("net_income", None)
                 rv = f.get("revenue", None)
                 if ni is not None and rv is not None and float(rv) != 0:
                     net_margin = float(ni) / float(rv)
@@ -276,7 +277,7 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
                 if "gics_sector" in df_out.columns:
                     pass
     except Exception:
-        log.debug("Could not attach sector mapping; continuing without it")
+        log.debug(" Could not attach sector mapping; continuing without it")
 
     # reorder columns to match schema expectations
     cols_order = ["ticker", "rebalance_date", "mom_3m", "mom_6m", "mom_12m",
@@ -293,7 +294,7 @@ def upsert_factor_snapshot(engine, df_factors: pd.DataFrame) -> int:
     Returns number of rows processed (len of df_factors).
     """
     if df_factors is None or df_factors.empty:
-        log.info("No factor rows to upsert")
+        log.info(" No factor rows to upsert")
         return 0
     # ensure types: rebalance_date as date
     df = df_factors.copy()
@@ -301,7 +302,7 @@ def upsert_factor_snapshot(engine, df_factors: pd.DataFrame) -> int:
         df["rebalance_date"] = pd.to_datetime(df["rebalance_date"]).dt.date
     # upsert into DB
     count = upsert_df_to_table(engine, df, "factor_snapshots", pk_cols=["ticker", "rebalance_date"])
-    log.info("Upserted %d factor snapshot rows", len(df))
+    log.info(" Upserted %d factor snapshot rows", len(df))
     return count
 
 
@@ -318,14 +319,14 @@ def main(argv=None):
     # wait for DB to be ready (use admin DB if necessary)
     ok = wait_for_db(args.db_url, timeout=args.wait)
     if not ok:
-        log.error("Database not reachable at %s", args.db_url)
+        log.error(" Database not reachable at %s", args.db_url)
         raise SystemExit(2)
 
     engine = get_engine(args.db_url)
-    log.info("Computing factors for rebalance_date=%s", args.rebalance_date)
+    log.info(" Computing factors for rebalance_date=%s", args.rebalance_date)
     df = compute_factors_for_rebalance(engine, args.rebalance_date, fund_lag_days=args.fund_lag_days)
     if df is None or df.empty:
-        log.info("No factors computed (empty result). Exiting.")
+        log.info(" No factors computed (empty result). Exiting.")
         return
     upsert_factor_snapshot(engine, df)
     log.info("Done.")

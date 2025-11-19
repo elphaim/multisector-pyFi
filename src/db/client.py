@@ -1,6 +1,5 @@
 """
 Database client helpers for Postgres (Docker-friendly).
-
 Usage examples:
     from src.db.client import get_engine, wait_for_db, apply_schema, upsert_df_to_table, get_last_ingested_date
 
@@ -23,6 +22,8 @@ from sqlalchemy.exc import OperationalError, SQLAlchemyError
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
+# ----- create sql engine ----------------------------------------------------
 
 def get_engine(db_url: str) -> Engine:
     """
@@ -53,6 +54,8 @@ def wait_for_db(db_url: str, timeout: int = 60, interval: float = 1.0) -> bool:
             time.sleep(interval)
 
 
+# ----- apply sql schema ----------------------------------------------------
+
 def apply_schema(engine: Engine, schema_path: str) -> None:
     """
     Apply SQL schema file to the connected PostgreSQL database.
@@ -66,8 +69,10 @@ def apply_schema(engine: Engine, schema_path: str) -> None:
     with engine.begin() as conn:
         for stmt in stmts:
             conn.execute(text(stmt))
-            log.info("Applied schema from %s", schema_path)
+            log.info(" Applied schema from %s", schema_path)
 
+
+# ----- upsert to table ----------------------------------------------------
 
 def upsert_df_to_table(engine: Engine, df: pd.DataFrame, table_name: str, pk_cols: List[str]) -> int:
     """

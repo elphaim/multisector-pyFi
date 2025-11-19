@@ -1,9 +1,9 @@
 """
 Backtest runner that simulates daily PnL using:
-- daily prices (adj_close)
-- rebalance dates and weights
-- simple execution model: trade at next day's open
-- optional transaction costs
+    - daily prices (adj_close)
+    - rebalance dates and weights
+    - simple execution model: trade at next day's open
+    - optional transaction costs
 
 Usage:
     from src.backtest.runner import run_backtest

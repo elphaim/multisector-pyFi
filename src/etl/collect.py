@@ -1,12 +1,11 @@
 """
 ETL collection helpers
-
 Provides:
-- seed_from_csv(engine, prices_path, fundamentals_path, tickers_path, source)
-- ingest_prices_from_csv(engine, csv_path, source)
-- ingest_fundamentals_from_csv(engine, csv_path, source)
-- ingest_tickers_from_csv(engine, csv_path, source)
-- CLI entrypoint to seed sample files into the DB (uses src.db.client.upsert_df_to_table)
+    - seed_from_csv(engine, prices_path, fundamentals_path, tickers_path, source)
+    - ingest_prices_from_csv(engine, csv_path, source)
+    - ingest_fundamentals_from_csv(engine, csv_path, source)
+    - ingest_tickers_from_csv(engine, csv_path, source)
+    - CLI entrypoint to seed sample files into the DB (uses src.db.client.upsert_df_to_table)
 
 Usage (seed sample CSVs):
     python -m src.etl.collect --db-url "postgresql://postgres:pwd@localhost:5332/postgres" \
@@ -31,6 +30,8 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
+# ----- helper utilities ----------------------------------------------------
+
 def _read_csv(csv_path: str) -> pd.DataFrame:
     if not csv_path or not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV path not found: {csv_path}")
@@ -39,6 +40,8 @@ def _read_csv(csv_path: str) -> pd.DataFrame:
     df.columns = [c.strip() for c in df.columns]
     return df
 
+
+# ----- ingest functions ----------------------------------------------------
 
 def ingest_prices_from_csv(engine, csv_path: str, source: str = "csv") -> int:
     """
@@ -86,7 +89,7 @@ def ingest_fundamentals_from_csv(engine, csv_path: str, source: str = "csv") -> 
     df = df[cols]
 
     count = upsert_df_to_table(engine, df, "raw_fundamentals", pk_cols=["ticker", "report_date"])
-    log.info("Ingested fundamentals rows: %d", len(df))
+    log.info(" Ingested fundamentals rows: %d", len(df))
     return count
 
 
@@ -107,7 +110,7 @@ def ingest_tickers_from_csv(engine, csv_path: str, source: str = "csv") -> int:
     df = df[cols]
 
     count = upsert_df_to_table(engine, df, "tickers", pk_cols=["ticker"])
-    log.info("Ingested tickers rows: %d", len(df))
+    log.info(" Ingested tickers rows: %d", len(df))
     return count
 
 
@@ -122,12 +125,11 @@ def seed_from_csv(engine, prices_path: Optional[str], fundamentals_path: Optiona
         results["fundamentals"] = ingest_fundamentals_from_csv(engine, fundamentals_path, source=source)
     if prices_path:
         results["prices"] = ingest_prices_from_csv(engine, prices_path, source=source)
-    log.info("Seed complete: %s", results)
+    log.info(" Seed complete: %s", results)
     return results
 
 
-# -------- CLI -------------------------------------------------
-
+# ----- CLI entrypoint ----------------------------------------------------
 
 def _build_engine_and_wait(db_url: str, wait_seconds: int = 30):
     engine = get_engine(db_url)
