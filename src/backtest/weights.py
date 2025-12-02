@@ -52,7 +52,8 @@ def volatility_adjusted_weights(scores: pd.DataFrame, vol: pd.Series, target_gro
     Returns DataFrame with ticker, weight.
     """
     df = scores.set_index("ticker").join(vol.rename("vol"))
-    df = df.dropna(subset=["score", "vol"])
+    # drop tickers with 0 volatility and a score, and drop tickers without either
+    df = df.dropna(subset=["score", "vol"]).loc[lambda d: d["vol"] > 0]
     df["raw"] = df["score"] / df["vol"]
     if normalization == "gross":
         total = df["raw"].abs().sum()
