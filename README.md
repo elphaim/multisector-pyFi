@@ -15,4 +15,5 @@ Scoring strategies provided:
   3. Ridge regression with tunable train, validation and look-forward windows
 
 For Ridge regression, an optuna optimization utility is included to find the optimal L2-regularization strength. 
-This optimization brings Sharpe up from 0.8 to 1.2.
+
+TO DO: log backtest attempts & metrics
