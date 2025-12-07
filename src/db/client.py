@@ -23,7 +23,10 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-# ----- create sql engine ----------------------------------------------------
+# ============================================================
+# SQL ENGINE
+# ============================================================
+
 
 def get_engine(db_url: str) -> Engine:
     """
@@ -54,7 +57,10 @@ def wait_for_db(db_url: str, timeout: int = 60, interval: float = 1.0) -> bool:
             time.sleep(interval)
 
 
-# ----- apply sql schema ----------------------------------------------------
+# ============================================================
+# SQL SCHEMA
+# ============================================================
+
 
 def apply_schema(engine: Engine, schema_path: str) -> None:
     """
@@ -72,7 +78,10 @@ def apply_schema(engine: Engine, schema_path: str) -> None:
             log.info(" Applied schema from %s", schema_path)
 
 
-# ----- upsert to table ----------------------------------------------------
+# ============================================================
+# UPSERT TO TABLE
+# ============================================================
+
 
 def upsert_df_to_table(engine: Engine, df: pd.DataFrame, table_name: str, pk_cols: List[str]) -> int:
     """

@@ -22,13 +22,17 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import text
 
-from src.db.client import get_engine
+#from src.db.client import get_engine
+from src.backtest.runner import load_price_panel
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-# ----- helper utilities ----------------------------------------------------
+# ============================================================
+# HELPER UTILITY
+# ============================================================
+
 
 def load_factor_history(engine, factors: List[str], start_date: Optional[str] = None, end_date: Optional[str] = None) -> pd.DataFrame:
     """
@@ -38,8 +42,8 @@ def load_factor_history(engine, factors: List[str], start_date: Optional[str] = 
     Optionally restrict by rebalance_date between start_date and end_date (inclusive).
     """
     cols = ["ticker", "rebalance_date"] + factors + ["gics_sector"]
-    # build SQL selecting available columns (skip missing ones)
-    # We will read the whole table and subset to be robust to missing columns.
+    # build SQL selecting available columns (skip missing ones):
+    # read the whole table and subset to be robust to missing columns.
     q = text("SELECT * FROM factor_snapshots WHERE 1=1" 
              + (" AND rebalance_date >= :start" if start_date else "") 
              + (" AND rebalance_date <= :end" if end_date else "")
@@ -59,26 +63,29 @@ def load_factor_history(engine, factors: List[str], start_date: Optional[str] = 
     return df[present]
 
 
-def load_price_panel(engine, start_date: str, end_date: str) -> pd.DataFrame:
-    """
-    Load adj_close prices between start_date and end_date.
-    Returns DataFrame indexed by trade_date with columns = tickers.
-    """
-    q = text("""
-        SELECT ticker, trade_date, adj_close
-        FROM raw_prices
-        WHERE trade_date BETWEEN :start AND :end
-        """)
-    with engine.connect() as conn:
-        df = pd.read_sql(q, conn, params={"start": start_date, "end": end_date})
-    if df.empty:
-        return pd.DataFrame()
-    df["trade_date"] = pd.to_datetime(df["trade_date"])
-    panel = df.pivot(index="trade_date", columns="ticker", values="adj_close").sort_index()
-    return panel
+#def load_price_panel(engine, start_date: str, end_date: str) -> pd.DataFrame:
+#    """
+#    Load adj_close prices between start_date and end_date.
+#    Returns DataFrame indexed by trade_date with columns = tickers.
+#    """
+#    q = text("""
+#        SELECT ticker, trade_date, adj_close
+#        FROM raw_prices
+#        WHERE trade_date BETWEEN :start AND :end
+#        """)
+#    with engine.connect() as conn:
+#        df = pd.read_sql(q, conn, params={"start": start_date, "end": end_date})
+#    if df.empty:
+#        return pd.DataFrame()
+#    df["trade_date"] = pd.to_datetime(df["trade_date"])
+#    panel = df.pivot(index="trade_date", columns="ticker", values="adj_close").sort_index()
+#    return panel
 
 
-# ----- forward returns ----------------------------------------------------
+# ============================================================
+# FORWARD RETURNS
+# ============================================================
+
 
 def compute_forward_returns(price_panel: pd.DataFrame, forward_days: int = 21) -> pd.DataFrame:
     """
@@ -98,19 +105,21 @@ def compute_forward_returns(price_panel: pd.DataFrame, forward_days: int = 21) -
     return forward_ret
 
 
-def align_factors_to_forward_returns(factors_long: pd.DataFrame, price_panel: pd.DataFrame, forward_days: int = 21) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def align_factors_to_forward_returns(factors_long: pd.DataFrame, 
+                                     price_panel: pd.DataFrame, 
+                                     forward_days: int = 21) -> Tuple[pd.DataFrame, pd.Series]:
     """
     Align factor snapshots (rebalance dates) with forward returns.
-    - factors_long: DataFrame with columns ticker, rebalance_date, factor columns...
+    - factors_long: DataFrame with columns ticker, rebalance_date, <factors...>
     - price_panel: price panel with daily adj_close indexed by trade_date
     - forward_days: number of trading days ahead to compute forward return
 
     Returns:
-    - X: DataFrame with MultiIndex = (rebalance_date, ticker), columns = factors
+    - X: DataFrame with MultiIndex = (rebalance_date, ticker), columns = <factors...>
     - y: Series indexed like X (MultiIndex (rebalance_date, ticker)) of forward returns
     """
     if factors_long.empty:
-        return pd.DataFrame(), pd.Series(dtype=float) # type: ignore
+        return pd.DataFrame(), pd.Series()
 
     # build forward returns panel
     forward = compute_forward_returns(price_panel, forward_days=forward_days)
@@ -118,23 +127,24 @@ def align_factors_to_forward_returns(factors_long: pd.DataFrame, price_panel: pd
     # create long factor table with one row per (rebalance_date, ticker)
     factor_cols = [c for c in factors_long.columns if c not in ("ticker", "rebalance_date", "gics_sector")]
     long = factors_long.copy().drop(columns=["gics_sector"], errors="ignore")
-    long = long.dropna(subset=factor_cols, how="all")  # keep rows where at least one factor exists
+    # keep rows where at least one factor exists
+    long = long.dropna(subset=factor_cols, how="all")
 
-    # For each (rebalance_date, ticker) pick the forward return starting the next trading day on or after rebalance_date.
-    # We will find the first trade_date >= rebalance_date in forward.index
+    # for each (rebalance_date, ticker) pick the forward return starting the next trading day on or after rebalance_date.
+    # find the first trade_date >= rebalance_date in forward.index
     trade_dates = forward.index
     if len(trade_dates) == 0:
-        return pd.DataFrame(), pd.Series(dtype=float) # type: ignore
+        return pd.DataFrame(), pd.Series()
 
     # helper to map rebalance_date to nearest trade_date index
     trade_ts = trade_dates.values.astype("datetime64[ns]")
-
     rows = []
     y_vals = []
     for _, r in long.iterrows():
         rb_date = np.datetime64(r["rebalance_date"])
-        # find first trade_date >= rb_date
-        pos = int(np.searchsorted(trade_ts, rb_date, side="left"))
+        # find first trade_date > rb_date
+        # strict ineq is important, otherwise introduce spurious correlations when trade_date = rb_date
+        pos = int(np.searchsorted(trade_ts, rb_date, side="right"))
         if pos >= len(trade_ts):
             continue
         trade_date = trade_dates[pos]
@@ -150,17 +160,20 @@ def align_factors_to_forward_returns(factors_long: pd.DataFrame, price_panel: pd
         y_vals.append(fr)
 
     if not rows:
-        return pd.DataFrame(), pd.Series(dtype=float) # type: ignore
+        return pd.DataFrame(), pd.Series()
 
     cols = ["rebalance_date", "ticker"] + factor_cols
     X = pd.DataFrame(rows, columns=cols)
     X["rebalance_date"] = pd.to_datetime(X["rebalance_date"])
     y = pd.Series(y_vals, index=pd.MultiIndex.from_tuples([(r[0], r[1]) for r in rows], names=["rebalance_date", "ticker"]))
     X = X.set_index(["rebalance_date", "ticker"])
-    return X[factor_cols], y # type: ignore
+    return X[factor_cols], y
 
 
-# ----- information coeffs ----------------------------------------------------
+# ============================================================
+# INFORMATION COEFFICIENTS
+# ============================================================
+
 
 def compute_ic_series(X: pd.DataFrame, y: pd.Series, method: str = "spearman") -> pd.DataFrame:
     """
@@ -187,7 +200,7 @@ def compute_ic_series(X: pd.DataFrame, y: pd.Series, method: str = "spearman") -
         for f in factor_cols:
             a = sub[f]
             b = sub["forward_ret"]
-            # drop pairs with na
+            # drop pairs with nan
             mask = a.notna() & b.notna()
             if mask.sum() < 5:
                 ic = np.nan
@@ -213,7 +226,7 @@ def summarize_ic(ic_df: pd.DataFrame) -> pd.DataFrame:
     """
     if ic_df.empty:
         return pd.DataFrame()
-    # better orientation: rows = factors
+    # orientation: rows = factors
     stats = pd.DataFrame({
         "mean_ic": ic_df.mean(),
         "std_ic": ic_df.std(ddof=1),
@@ -223,7 +236,10 @@ def summarize_ic(ic_df: pd.DataFrame) -> pd.DataFrame:
     return stats
 
 
-# ----- ic scoring ----------------------------------------------------
+# ============================================================
+# IC-SCORING
+# ============================================================
+
 
 def ic_weighted_scores(engine,
                        rebalance_date: str,
@@ -246,8 +262,8 @@ def ic_weighted_scores(engine,
     """
     # load recent factor history
     end = pd.to_datetime(rebalance_date)
-    # load a generous history window to ensure we have at least lookback_rebalances points
-    hist_start = (end - pd.Timedelta(days=365)).strftime("%Y-%m-%d")
+    # load a generous history window (10 years) to ensure we have at least lookback_rebalances points
+    hist_start = (end - pd.Timedelta(days=10*365)).strftime("%Y-%m-%d")
     factors_hist = load_factor_history(engine, factors, start_date=hist_start, end_date=rebalance_date)
     if factors_hist.empty:
         return pd.DataFrame(columns=["ticker", "score"])
@@ -255,14 +271,14 @@ def ic_weighted_scores(engine,
     # load price panel covering from earliest hist rebalance to forward horizon
     earliest_rb = factors_hist["rebalance_date"].min()
     price_start = earliest_rb.strftime("%Y-%m-%d")
-    price_end = (end + pd.Timedelta(days=forward_days + 10)).strftime("%Y-%m-%d")
+    price_end = (end + pd.Timedelta(days=forward_days + 21)).strftime("%Y-%m-%d")
     price_panel = load_price_panel(engine, price_start, price_end)
     X, y = align_factors_to_forward_returns(factors_hist, price_panel, forward_days=forward_days)
     if X.empty or y.empty:
-        log.warning(" No aligned X/y for IC computation")
+        log.warning(" No aligned X/y available for IC computation")
         return pd.DataFrame(columns=["ticker", "score"])
 
-    ic_df = compute_ic_series(X, y, method=ic_method) # type: ignore
+    ic_df = compute_ic_series(X, y, method=ic_method)
     if ic_df.empty:
         return pd.DataFrame(columns=["ticker", "score"])
 
@@ -309,9 +325,12 @@ def ic_weighted_scores(engine,
     return out.sort_values("score", ascending=False)
 
 
-# ----- Ridge scoring ----------------------------------------------------
+# ============================================================
+# RIDGE-BASED SCORING
+# ============================================================
 
-def fit_ridge_model(X: pd.DataFrame, y: pd.Series, alpha: float = 1.0) -> Tuple["Ridge", pd.DataFrame]: # type: ignore
+
+def fit_ridge_model(X: pd.DataFrame, y: pd.Series, alpha: float = 1.0) -> pd.Series:
     """
     Fit a Ridge regression model to predict y from X.
     X: DataFrame indexed by MultiIndex (rebalance_date, ticker) with factor columns
@@ -321,21 +340,21 @@ def fit_ridge_model(X: pd.DataFrame, y: pd.Series, alpha: float = 1.0) -> Tuple[
     try:
         from sklearn.linear_model import Ridge
     except Exception as e:
-        raise ImportError("sklearn is required for regression-based scoring") from e
+        raise ImportError(" sklearn is required for regression-based scoring") from e
 
     # align X and y
     df = X.join(y.rename("y")).dropna(subset=["y"])
     df = df.dropna()
     if df.empty:
-        raise ValueError("No overlapping training samples for Ridge")
+        raise ValueError(" No overlapping training samples for Ridge")
 
     cols = X.columns
-    X_train = df[cols].values
-    y_train = df["y"].values
+    X_train = df[cols]
+    y_train = df["y"]
     model = Ridge(alpha=alpha)
-    model.fit(X_train, y_train) # type: ignore
+    model.fit(X_train, y_train)
     coefs = pd.Series(model.coef_, index=cols, name="coef")
-    return model, coefs # type: ignore
+    return coefs
 
 
 def ridge_scoring(engine,
@@ -361,12 +380,13 @@ def ridge_scoring(engine,
     if factors_hist.empty:
         return pd.DataFrame(columns=["ticker", "score"])
 
-    price_panel = load_price_panel(engine, start, (end + pd.Timedelta(days=forward_days + 10)).strftime("%Y-%m-%d"))
+    price_end = (end + pd.Timedelta(days=forward_days + 21)).strftime("%Y-%m-%d")
+    price_panel = load_price_panel(engine, start, price_end)
     X, y = align_factors_to_forward_returns(factors_hist, price_panel, forward_days=forward_days)
     if X.empty or y.empty:
         return pd.DataFrame(columns=["ticker", "score"])
 
-    model, coefs = fit_ridge_model(X, y, alpha=alpha) # type: ignore
+    coefs = fit_ridge_model(X, y, alpha=alpha)
     # load target snapshot
     target = load_factor_history(engine, factors, start_date=rebalance_date, end_date=rebalance_date)
     if target.empty:
@@ -380,27 +400,3 @@ def ridge_scoring(engine,
     out = scores.reset_index().rename(columns={0: "score"})
     out.columns = ["ticker", "score"]
     return out.sort_values("score", ascending=False)
-
-
-# -------------------------
-# Utilities and small CLI
-# -------------------------
-
-def topk_from_scores(scores_df: pd.DataFrame, k: int = 50) -> pd.DataFrame:
-    """
-    Helper: return top-k tickers by score (descending)
-    """
-    return scores_df.sort_values("score", ascending=False).head(k)
-
-
-if __name__ == "__main__":
-    # Minimal demo when invoked directly (requires a DB URL in env or modify below)
-    import os
-    DB_URL = os.getenv("DB_URL")
-    if not DB_URL:
-        print("Set DB_URL environment variable to run demo")
-    else:
-        eng = get_engine(DB_URL)
-        print("Available factor snapshot dates (sample):")
-        df = load_factor_history(eng, ["momentum_3m", "size", "pe_ratio"], start_date=None, end_date=None)
-        print(df["rebalance_date"].unique()[:5])

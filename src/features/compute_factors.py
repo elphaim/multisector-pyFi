@@ -15,10 +15,9 @@ Assumptions & notes:
 - Factor snapshots are computed for a single rebalance_date passed as argument.
 - All returns use adj_close. Momentum lookbacks count trading days (approximate: 21 trading days ~ 1 month)
 - Uses src.db.client.upsert_df_to_table to write factor_snapshots
-- CLI: run as module `python -m src.features.compute_factors --db-url ... --rebalance-date YYYY-MM-DD`
 """
 
-import argparse
+#import argparse
 import logging
 import numpy as np
 import pandas as pd
@@ -27,13 +26,17 @@ from typing import Optional
 
 from sqlalchemy import text
 
-from src.db.client import get_engine, wait_for_db, upsert_df_to_table
+#from src.db.client import get_engine, wait_for_db, upsert_df_to_table
+from src.db.client import upsert_df_to_table
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
 
-# ----- helper utilities ----------------------------------------------------
+# ============================================================
+# HELPER UTILITIES
+# ============================================================
+
 
 def _load_prices(engine, as_of_date: str) -> pd.DataFrame:
     """
@@ -97,19 +100,22 @@ def _latest_fundamentals_for_date(fund_df: pd.DataFrame, as_of_date: pd.Timestam
     return chosen
 
 
-def _daily_returns_from_adj_close(df_prices: pd.DataFrame) -> pd.DataFrame:
-    """
-    Given prices with ticker, trade_date, adj_close (datetime), compute daily returns per ticker.
-    Returns DataFrame with ticker, trade_date, ret (simple return).
-    """
-    if df_prices.empty:
-        return pd.DataFrame(columns=["ticker", "trade_date", "ret"])
-    df = df_prices.sort_values(["ticker", "trade_date"]).copy()
-    df["ret"] = df.groupby("ticker")["adj_close"].pct_change()
-    return df[["ticker", "trade_date", "ret"]]
+#def _daily_returns_from_adj_close(df_prices: pd.DataFrame) -> pd.DataFrame:
+#    """
+#    Given prices with ticker, trade_date, adj_close (datetime), compute daily returns per ticker.
+#    Returns DataFrame with ticker, trade_date, ret (simple return).
+#    """
+#    if df_prices.empty:
+#        return pd.DataFrame(columns=["ticker", "trade_date", "ret"])
+#    df = df_prices.sort_values(["ticker", "trade_date"]).copy()
+#    df["ret"] = df.groupby("ticker")["adj_close"].pct_change()
+#    return df[["ticker", "trade_date", "ret"]]
 
 
-# ----- factor computations -------------------------------------------------
+# ============================================================
+# FACTOR COMPUTATIONS
+# ============================================================
+
 
 def compute_momentum(adj_close_series: pd.Series, lookback_days: int, exclude_recent: int = 5) -> Optional[float]:
     """
@@ -146,7 +152,10 @@ def compute_rolling_vol(returns: pd.Series, window: int) -> Optional[float]:
     return float(sigma * (252 ** 0.5))
 
 
-# ----- orchestrator -------------------------------------------------------
+# ============================================================
+# ORCHESTRATOR FUNCTION
+# ============================================================
+
 
 def build_price_panel(prices: pd.DataFrame) -> pd.DataFrame:
     """
@@ -161,7 +170,9 @@ def build_price_panel(prices: pd.DataFrame) -> pd.DataFrame:
     return panel
 
 
-def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: dict = None, fund_lag_days: int = 30) -> pd.DataFrame: # type: ignore
+def compute_factors_for_rebalance(engine, rebalance_date: str, 
+                                  lookbacks_days: dict = {"m3": 63, "m6": 126, "m12": 252, "v1": 21, "v3": 63}, 
+                                  fund_lag_days: int = 30) -> pd.DataFrame:
     """
     Compute factor snapshot for the rebalance_date (string "YYYY-MM-DD").
     Returns DataFrame with one row per ticker and the factor columns.
@@ -177,10 +188,6 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
     date_cols = list(price_panel.columns)
     if not date_cols:
         return pd.DataFrame()
-
-    # defaults if not provided
-    if lookbacks_days is None:
-        lookbacks_days = {"m3": 63, "m6": 126, "m12": 252, "v1": 21, "v3": 63}
 
     # compute fundamentals
     fund_df = _load_fundamentals(engine)
@@ -213,7 +220,7 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
         roe = None
         net_margin = None
         if ticker in fund_wide.index:
-            f = fund_wide.loc[ticker] # type: ignore
+            f = fund_wide.loc[ticker]  # type: ignore
             try:
                 mc = f.get("market_cap", None)
                 if mc is not None and mc > 1:
@@ -288,6 +295,11 @@ def compute_factors_for_rebalance(engine, rebalance_date: str, lookbacks_days: d
     return df_out
 
 
+# ============================================================
+# UPSERT TO TABLE
+# ============================================================
+
+
 def upsert_factor_snapshot(engine, df_factors: pd.DataFrame) -> int:
     """
     Upsert computed factor snapshot into factor_snapshots table.
@@ -308,29 +320,28 @@ def upsert_factor_snapshot(engine, df_factors: pd.DataFrame) -> int:
 
 # ----- CLI -----------------------------------------------------------------
 
-def main(argv=None):
-    p = argparse.ArgumentParser()
-    p.add_argument("--db-url", required=True, help="SQLAlchemy DB URL")
-    p.add_argument("--rebalance-date", required=True, help="Rebalance date (YYYY-MM-DD)")
-    p.add_argument("--fund-lag-days", type=int, default=30, help="Lag in days to apply to fundamentals availability")
-    p.add_argument("--wait", type=int, default=30, help="Seconds to wait for DB if starting with Docker")
-    args = p.parse_args(argv)
+#def main(argv=None):
+#    p = argparse.ArgumentParser()
+#    p.add_argument("--db-url", required=True, help="SQLAlchemy DB URL")
+#    p.add_argument("--rebalance-date", required=True, help="Rebalance date (YYYY-MM-DD)")
+#    p.add_argument("--fund-lag-days", type=int, default=30, help="Lag in days to apply to fundamentals availability")
+#    p.add_argument("--wait", type=int, default=30, help="Seconds to wait for DB if starting with Docker")
+#    args = p.parse_args(argv)
 
-    # wait for DB to be ready (use admin DB if necessary)
-    ok = wait_for_db(args.db_url, timeout=args.wait)
-    if not ok:
-        log.error(" Database not reachable at %s", args.db_url)
-        raise SystemExit(2)
+#    # wait for DB to be ready (use admin DB if necessary)
+#    ok = wait_for_db(args.db_url, timeout=args.wait)
+#    if not ok:
+#        log.error(" Database not reachable at %s", args.db_url)
+#        raise SystemExit(2)
 
-    engine = get_engine(args.db_url)
-    log.info(" Computing factors for rebalance_date=%s", args.rebalance_date)
-    df = compute_factors_for_rebalance(engine, args.rebalance_date, fund_lag_days=args.fund_lag_days)
-    if df is None or df.empty:
-        log.info(" No factors computed (empty result). Exiting.")
-        return
-    upsert_factor_snapshot(engine, df)
-    log.info("Done.")
+#    engine = get_engine(args.db_url)
+#    log.info(" Computing factors for rebalance_date=%s", args.rebalance_date)
+#    df = compute_factors_for_rebalance(engine, args.rebalance_date, fund_lag_days=args.fund_lag_days)
+#    if df is None or df.empty:
+#        log.info(" No factors computed (empty result). Exiting.")
+#        return
+#    upsert_factor_snapshot(engine, df)
+#    log.info("Done.")
 
-
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()

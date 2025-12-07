@@ -1,4 +1,6 @@
 ticker,name,exchange,gics_sector,gics_industry,currency
+AB,AllianceBernstein Holding L.P.,NYSE,Financial Services,Asset Management,USD
+ABEO,Abeona Therapeutics Inc.,NasdaqCM,Healthcare,Biotechnology,USD
 ABT,Abbott Laboratories,NYSE,Healthcare,Medical Devices,USD
 ACA,"Arcosa, Inc.",NYSE,Industrials,Engineering & Construction,USD
 ADM,Archer-Daniels-Midland Company,NYSE,Consumer Defensive,Farm Products,USD
@@ -25,7 +27,7 @@ CRI,"Carter's, Inc.",NYSE,Consumer Cyclical,Apparel Retail,USD
 CRTO,Criteo S.A.,NasdaqGS,Communication Services,Advertising Agencies,USD
 CTRA,Coterra Energy Inc.,NYSE,Energy,Oil & Gas E&P,USD
 D,"Dominion Energy, Inc.",NYSE,Utilities,Utilities - Regulated Electric,USD
-DEC,Diversified Energy Company PLC,NYSE,Energy,Oil & Gas Integrated,USD
+DEC,Diversified Energy Company,NYSE,Energy,Oil & Gas Integrated,USD
 DELL,Dell Technologies Inc.,NYSE,Technology,Computer Hardware,USD
 DHI,"D.R. Horton, Inc.",NYSE,Consumer Cyclical,Residential Construction,USD
 DIS,The Walt Disney Company,NYSE,Communication Services,Entertainment,USD
@@ -38,7 +40,7 @@ FICO,Fair Isaac Corporation,NYSE,Technology,Software - Application,USD
 FR,"First Industrial Realty Trust, Inc.",NYSE,Real Estate,REIT - Industrial,USD
 GAM,"General American Investors Company, Inc.",NYSE,Financial Services,Asset Management,USD
 GE,GE Aerospace,NYSE,Industrials,Aerospace & Defense,USD
-GNFT,Genfit S.A.,NasdaqGS,Healthcare,Biotechnology,EUR
+GNFT,Genfit S.A.,,Healthcare,Biotechnology,EUR
 GNRC,Generac Holdings Inc.,NYSE,Industrials,Specialty Industrial Machinery,USD
 GPC,Genuine Parts Company,NYSE,Consumer Cyclical,Auto Parts,USD
 GRMN,Garmin Ltd.,NYSE,Technology,Scientific & Technical Instruments,USD
@@ -93,8 +95,6 @@ USB,U.S. Bancorp,NYSE,Financial Services,Banks - Regional,USD
 VAC,Marriott Vacations Worldwide Corporation,NYSE,Consumer Cyclical,Resorts & Casinos,USD
 VRSN,"VeriSign, Inc.",NasdaqGS,Technology,Software - Infrastructure,USD
 VST,Vistra Corp.,NYSE,Utilities,Utilities - Independent Power Producers,USD
-AB,AllianceBernstein Holding L.P.,NYSE,Financial Services,Asset Management,USD
-ABEO,Abeona Therapeutics Inc.,NasdaqCM,Healthcare,Biotechnology,USD
 WMT,Walmart Inc.,NYSE,Consumer Defensive,Discount Stores,USD
 WST,"West Pharmaceutical Services, Inc.",NYSE,Healthcare,Medical Instruments & Supplies,USD
 XEL,Xcel Energy Inc.,NasdaqGS,Utilities,Utilities - Regulated Electric,USD

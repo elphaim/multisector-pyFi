@@ -11,10 +11,15 @@ Usage:
 """
 
 import pandas as pd
-import numpy as np
+#import numpy as np
 
 from sqlalchemy import text
-from src.db.client import get_engine
+#from src.db.client import get_engine
+
+
+# ============================================================
+# HELPER UTILITY
+# ============================================================
 
 
 def load_price_panel(engine, start_date: str, end_date: str) -> pd.DataFrame:
@@ -26,20 +31,27 @@ def load_price_panel(engine, start_date: str, end_date: str) -> pd.DataFrame:
         SELECT ticker, trade_date, adj_close
         FROM raw_prices
         WHERE trade_date BETWEEN :start AND :end
-    """)
+        """)
     with engine.connect() as conn:
         df = pd.read_sql(q, conn, params={"start": start_date, "end": end_date})
+    if df.empty:
+        return pd.DataFrame()
     df["trade_date"] = pd.to_datetime(df["trade_date"])
     panel = df.pivot(index="trade_date", columns="ticker", values="adj_close").sort_index()
     return panel
 
 
-def run_backtest(engine, weights_df: pd.DataFrame, start_date: str, end_date: str, cost_bps=10) -> pd.DataFrame:
+# ============================================================
+# BACKTEST
+# ============================================================
+
+
+def run_backtest(engine, weights_df: pd.DataFrame, start_date: str, end_date: str, cost_bps: int = 10) -> pd.DataFrame:
     """
     Run a simple backtest using daily prices and rebalance weights.
 
     weights_df: DataFrame with columns [rebalance_date, ticker, weight]
-    Returns DataFrame with daily portfolio value and PnL.
+    Returns DataFrame with daily portfolio value, PnL and drawdown
     """
     prices = load_price_panel(engine, start_date, end_date)
     returns = prices.pct_change().fillna(0)
@@ -66,4 +78,7 @@ def run_backtest(engine, weights_df: pd.DataFrame, start_date: str, end_date: st
         portfolio.loc[date, "net_exposure"] = current_weights.sum()
 
     portfolio["cum_return"] = (1 + portfolio["pnl"]).cumprod()
+    peak = portfolio["cum_return"].cummax()
+    portfolio["drawdown"] = portfolio["cum_return"] / peak - 1.0
+
     return portfolio

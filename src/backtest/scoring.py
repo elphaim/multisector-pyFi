@@ -4,7 +4,6 @@ Reads factor_snapshots for a given rebalance_date and computes a score per ticke
 Supports:
     - Single-factor scoring
     - Equal-weight multi-factor scoring
-    - IC-weighted scoring (to be implemented)
     - Sector-neutral z-score normalization
 
 Usage:
@@ -17,13 +16,15 @@ from typing import List
 
 import pandas as pd
 from sqlalchemy import text
-from src.db.client import get_engine
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-# ----- helper utilities ----------------------------------------------------
+# ============================================================
+# HELPER UTILITIES
+# ============================================================
+
 
 def _load_factors(engine, rebalance_date: str, factors: List[str]) -> pd.DataFrame:
     """
@@ -53,7 +54,10 @@ def _sector_zscore(df: pd.DataFrame, factor: str) -> pd.Series:
     return df.groupby("gics_sector")[factor].transform(zscore)
 
 
-# ----- scoring function ----------------------------------------------------
+# ============================================================
+# SCORING FUNCTION
+# ============================================================
+
 
 def score_tickers(engine, rebalance_date: str, factors: List[str], method: str = "equal_weight", sector_neutral: bool = True) -> pd.DataFrame:
     """

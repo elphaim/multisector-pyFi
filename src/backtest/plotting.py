@@ -16,6 +16,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
+# ============================================================
+# PLOT INDIVIDUALS
+# ============================================================
+
+
 def plot_equity_curve(df: pd.DataFrame, ax=None):
     """
     Plot cumulative return over time.
@@ -35,9 +40,7 @@ def plot_drawdown(df: pd.DataFrame, ax=None):
     """
     if ax is None:
         fig, ax = plt.subplots(figsize=(10, 3))
-    peak = df["cum_return"].cummax()
-    drawdown = df["cum_return"] / peak - 1.0
-    drawdown.plot(ax=ax, color="red", lw=1.5)
+    df["drawdown"].plot(ax=ax, color="red", lw=1.5)
     ax.set_title("Drawdown")
     ax.set_ylabel("Drawdown")
     ax.grid(True)
@@ -58,6 +61,11 @@ def plot_exposure(df: pd.DataFrame, ax=None):
     ax.set_ylabel("Exposure")
     ax.grid(True)
     return ax
+
+
+# ============================================================
+# PLOT ALL TOGETHER
+# ============================================================
 
 
 def plot_all(df: pd.DataFrame):

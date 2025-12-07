@@ -6,22 +6,12 @@ Provides:
     - ingest_fundamentals_from_csv(engine, csv_path, source)
     - ingest_tickers_from_csv(engine, csv_path, source)
     - CLI entrypoint to seed sample files into the DB (uses src.db.client.upsert_df_to_table)
-
-Usage (seed sample CSVs):
-    python -m src.etl.collect --db-url "postgresql://postgres:pwd@localhost:5332/postgres" \
-      --prices data/sample_prices.csv --fundamentals data/sample_fundamentals.csv --tickers data/sample_tickers.csv \
-      --source sample_csv
-
-Usage (single table CSV ingest):
-    python -m src.etl.collect --db-url "postgresql://postgres:pwd@localhost:5332/postgres" \
-      --prices data/sample_prices.csv --source sample_csv
 """
 
-import argparse
+#import argparse
 import logging
 import os
 from typing import Optional
-
 import pandas as pd
 
 from src.db.client import get_engine, upsert_df_to_table, wait_for_db
@@ -30,7 +20,10 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 
-# ----- helper utilities ----------------------------------------------------
+# ============================================================
+# HELPER UTILITY
+# ============================================================
+
 
 def _read_csv(csv_path: str) -> pd.DataFrame:
     if not csv_path or not os.path.exists(csv_path):
@@ -41,7 +34,10 @@ def _read_csv(csv_path: str) -> pd.DataFrame:
     return df
 
 
-# ----- ingest functions ----------------------------------------------------
+# ============================================================
+# INGEST FUNCTIONS
+# ============================================================
+
 
 def ingest_prices_from_csv(engine, csv_path: str, source: str = "csv") -> int:
     """
@@ -130,32 +126,32 @@ def seed_from_csv(engine, prices_path: Optional[str], fundamentals_path: Optiona
 
 
 # ----- CLI entrypoint ----------------------------------------------------
-
-def _build_engine_and_wait(db_url: str, wait_seconds: int = 30):
-    engine = get_engine(db_url)
-    # wait for DB (use admin DB url if connecting to default postgres)
-    ok = wait_for_db(db_url, timeout=wait_seconds)
-    if not ok:
-        raise RuntimeError(f"Database not reachable at {db_url}")
-    return engine
-
-
-def main(argv=None):
-    p = argparse.ArgumentParser()
-    p.add_argument("--db-url", required=True, help="SQLAlchemy DB URL")
-    p.add_argument("--prices", help="CSV file path for prices")
-    p.add_argument("--fundamentals", help="CSV file path for fundamentals")
-    p.add_argument("--tickers", help="CSV file path for tickers")
-    p.add_argument("--source", default="sample_csv", help="source label to write into source column")
-    p.add_argument("--wait", type=int, default=30, help="seconds to wait for DB to become available")
-    args = p.parse_args(argv)
-
-    engine = _build_engine_and_wait(args.db_url, wait_seconds=args.wait)
-
-    # seed provided files
-    results = seed_from_csv(engine, prices_path=args.prices, fundamentals_path=args.fundamentals, tickers_path=args.tickers, source=args.source)
-    print("Seed results:", results)
+#
+#def _build_engine_and_wait(db_url: str, wait_seconds: int = 30):
+#    engine = get_engine(db_url)
+#    # wait for DB (use admin DB url if connecting to default postgres)
+#    ok = wait_for_db(db_url, timeout=wait_seconds)
+#    if not ok:
+#        raise RuntimeError(f"Database not reachable at {db_url}")
+#    return engine
 
 
-if __name__ == "__main__":
-    main()
+#def main(argv=None):
+#    p = argparse.ArgumentParser()
+#    p.add_argument("--db-url", required=True, help="SQLAlchemy DB URL")
+#    p.add_argument("--prices", help="CSV file path for prices")
+#    p.add_argument("--fundamentals", help="CSV file path for fundamentals")
+#    p.add_argument("--tickers", help="CSV file path for tickers")
+#    p.add_argument("--source", default="sample_csv", help="source label to write into source column")
+#    p.add_argument("--wait", type=int, default=30, help="seconds to wait for DB to become available")
+#    args = p.parse_args(argv)
+
+#    engine = _build_engine_and_wait(args.db_url, wait_seconds=args.wait)
+
+#    # seed provided files
+#    results = seed_from_csv(engine, prices_path=args.prices, fundamentals_path=args.fundamentals, tickers_path=args.tickers, source=args.source)
+#    print("Seed results:", results)
+
+
+#if __name__ == "__main__":
+#    main()
