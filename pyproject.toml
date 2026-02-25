@@ -23,6 +23,7 @@ dev = [
     "jupyter",
     "python-dotenv",
     "pytest>=7.4",
+    "optuna>=3.0",
 ]
 
 [project.scripts]
