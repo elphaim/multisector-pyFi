@@ -22,6 +22,7 @@ dependencies = [
 dev = [
     "jupyter",
     "python-dotenv",
+    "pytest>=7.4",
 ]
 
 [project.scripts]
