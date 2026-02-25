@@ -1,8 +1,6 @@
 pandas
 numpy
-datetime
-pydantic-settings
-psycopg2
+psycopg2-binary
 sqlalchemy
 matplotlib
 scikit-learn
