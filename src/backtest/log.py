@@ -2,7 +2,7 @@
 CLI wrapper for multi-date backtest with logging.
 
 Usage:
-python -m src.backtest.cli_run_backtest \
+python -m src.backtest.log \
   --db-url "postgresql://demo:demo_pass@localhost:5432/demo_db" \
   --start-date "2025-10-01" \
   --end-date "2025-12-31" \
@@ -13,6 +13,7 @@ python -m src.backtest.cli_run_backtest \
 """
 
 import argparse
+import json
 import logging
 import uuid
 from typing import List
@@ -59,8 +60,8 @@ def log_backtest_metadata(engine, run_id: str, name: str, start: str, end: str, 
             "name": name,
             "start_date": start,
             "end_date": end,
-            "params": params,
-            "metrics": metrics,
+            "params": json.dumps(params),
+            "metrics": json.dumps(metrics),
         })
 
 
@@ -130,7 +131,7 @@ def main(argv=None):
 
     metrics = {
         "final_return": float(results["cum_return"].iloc[-1]),
-        "max_drawdown": float(results["cum_return"].max() - results["cum_return"].min()),
+        "max_drawdown": float(results["drawdown"].min()),
         "total_days": int(len(results)),
     }
 

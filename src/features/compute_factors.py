@@ -89,7 +89,7 @@ def _latest_fundamentals_for_date(fund_df: pd.DataFrame, as_of_date: pd.Timestam
     if cand.empty:
         return pd.DataFrame(columns=["ticker"])
     # choose max report_date per ticker
-    idx = cand.groupby("ticker")["report_date"].idxmax().dropna().astype(int)
+    idx = cand.groupby("ticker")["report_date"].idxmax().dropna()
     chosen = cand.loc[idx].copy()
     chosen = chosen.set_index("ticker")
     chosen.index.name = "ticker"
@@ -263,22 +263,10 @@ def compute_factors_for_rebalance(engine, rebalance_date: str,
         m6 = compute_momentum(adj, lookbacks_days["m6"], exclude_recent=5)
         m12 = compute_momentum(adj, lookbacks_days["m12"], exclude_recent=5)
 
-        # short reversals
-        rev5 = compute_short_term_reversal(adj, window=5)
-        rev10 = compute_short_term_reversal(adj, window=10)
-
-        # trend slopes
-        trend63 = compute_trend_slope(adj, lookbacks_days["m3"])
-        trend126 = compute_trend_slope(adj, lookbacks_days["m6"])
-
-        # returns series for vol
-        # build a returns series for the last max window days
-        # compute daily returns from adj series
+        # volatility
         adj_ret = adj.pct_change().dropna()
         v1 = compute_rolling_vol(adj_ret, lookbacks_days["v1"])
         v3 = compute_rolling_vol(adj_ret, lookbacks_days["v3"])
-
-        # volume z-scores
 
 
         size = None

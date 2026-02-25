@@ -195,6 +195,7 @@ def evaluate_alpha_via_walkforward(X: pd.DataFrame,
 #        fold_id = 0
         fold_scores = []
         coefs_list = []
+        last_X_train_cols = None
 
         for (t_start, t_end, v_start, v_end) in folds:
 
@@ -247,47 +248,7 @@ def evaluate_alpha_via_walkforward(X: pd.DataFrame,
 
             # Align columns
             X_val = X_val.reindex(columns=X_train.columns).fillna(0.0)
-
-            # Optional diagnostics for fold
-            def _diagnose_fold(X_train, y_train, X_val, y_val, alpha, fold_id):
-                print("\n====================")
-                print(f"FOLD {fold_id} — alpha={alpha}")
-                print("====================")
-                # Basic shapes
-                print("X_train shape:", X_train.shape)
-                print("y_train shape:", y_train.shape)
-                print("X_val shape:", X_val.shape)
-                print("y_val shape:", y_val.shape)
-                # Check for NaNs
-                print("X_train NaNs:", X_train.isna().sum().sum())
-                print("y_train NaNs:", y_train.isna().sum())
-                print("X_val NaNs:", X_val.isna().sum().sum())
-                print("y_val NaNs:", y_val.isna().sum())
-                # Variation in y
-                print("y_train mean/std/min/max:", 
-                      float(y_train.mean()), 
-                      float(y_train.std()), 
-                      float(y_train.min()),
-                      float(y_train.max()))
-                # Variation in factors
-                print("Factor std (train):")
-                print(X_train.std().sort_values())
-                # Cross-sectional size per rebalance date
-                print("Cross-sectional counts (train):")
-                print(X_train.groupby(level=0).size().describe())
-                # Check if factors are constant within cross-sections
-                print("Cross-sectional factor std per date (train):")
-                cs_std = X_train.groupby(level=0).std()
-                print(cs_std.mean().sort_values())
-                # Correlation between factors and y (raw)
-                try:
-                    df = X_train.copy()
-                    df["y"] = y_train
-                    print("Raw factor-y correlations:")
-                    print(df.corr()["y"].sort_values())
-                except Exception as e:
-                    print("Correlation failed:", e)
-                print("====================\n")
+            last_X_train_cols = X_train.columns
 
             # Fit Ridge
             coef = fit_ridge_model(X_train, y_train, alpha)
@@ -313,7 +274,6 @@ def evaluate_alpha_via_walkforward(X: pd.DataFrame,
             fold_scores.append(fold_score)
 
 #            fold_id += 1
-#            _diagnose_fold(X_train, y_train, X_val, y_val, alpha, fold_id)
 
         # Aggregate
         if len(fold_scores) == 0:
@@ -324,8 +284,8 @@ def evaluate_alpha_via_walkforward(X: pd.DataFrame,
             }
         else:
             coef_std = (
-                pd.Series(np.nanstd(np.vstack(coefs_list), axis=0), index=X_train.columns) # pyright: ignore[reportPossiblyUnboundVariable]
-                if coefs_list else None
+                pd.Series(np.nanstd(np.vstack(coefs_list), axis=0), index=last_X_train_cols)
+                if coefs_list and last_X_train_cols is not None else None
             )
             alpha_results[alpha] = {
                 "fold_scores": fold_scores,

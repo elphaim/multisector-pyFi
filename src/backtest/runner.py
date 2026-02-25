@@ -59,7 +59,7 @@ def run_backtest(engine, weights_df: pd.DataFrame, start_date: str, end_date: st
     weights_df["rebalance_date"] = pd.to_datetime(weights_df["rebalance_date"])
     weights_by_date = {d: g.set_index("ticker")["weight"] for d, g in weights_df.groupby("rebalance_date")}
 
-    portfolio = pd.DataFrame(index=returns.index, columns=["pnl", "gross_exposure", "net_exposure"])
+    portfolio = pd.DataFrame(0.0, index=returns.index, columns=["pnl", "gross_exposure", "net_exposure"])
     current_weights = pd.Series(0.0, index=returns.columns)
 
     for date in returns.index:

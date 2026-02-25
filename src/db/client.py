@@ -44,13 +44,14 @@ def wait_for_db(db_url: str, timeout: int = 60, interval: float = 1.0) -> bool:
     """
     start = time.time()
     while True:
+        eng = create_engine(db_url)
         try:
-            eng = create_engine(db_url)
             with eng.connect() as conn:
                 conn.execute(text("SELECT 1"))
             log.info(" Database reachable at %s", db_url)
             return True
         except OperationalError as e:
+            eng.dispose()
             if time.time() - start > timeout:
                 log.error(" Timed out waiting for DB: %s", e)
                 return False
@@ -75,7 +76,7 @@ def apply_schema(engine: Engine, schema_path: str) -> None:
     with engine.begin() as conn:
         for stmt in stmts:
             conn.execute(text(stmt))
-            log.info(" Applied schema from %s", schema_path)
+    log.info(" Applied schema from %s", schema_path)
 
 
 # ============================================================
@@ -108,24 +109,27 @@ def upsert_df_to_table(engine: Engine, df: pd.DataFrame, table_name: str, pk_col
         quoted_cols = ", ".join(f'"{c}"' for c in cols)
         pk_quoted = ", ".join(f'"{c}"' for c in pk_cols)
         update_cols = [c for c in cols if c not in pk_cols]
+
+        # When all columns are part of the PK there is nothing to update on conflict.
         if update_cols:
-            update_assign = ", ".join(f'"{c}" = EXCLUDED."{c}"' for c in update_cols)
+            on_conflict_clause = "DO UPDATE SET " + ", ".join(
+                f'"{c}" = EXCLUDED."{c}"' for c in update_cols
+            )
         else:
-            update_assign = ""
+            on_conflict_clause = "DO NOTHING"
 
         upsert_sql = f"""
         INSERT INTO "{table_name}" ({quoted_cols})
         SELECT {quoted_cols} FROM "{tmp_table}"
-        ON CONFLICT ({pk_quoted})
-        DO UPDATE SET {update_assign}
-        ;
-        DROP TABLE IF EXISTS "{tmp_table}";
+        ON CONFLICT ({pk_quoted}) {on_conflict_clause}
         """
         conn.execute(text(upsert_sql))
-        
-        # Attempt to count rows in staging to report processed row count
+        # Drop staging table as a separate statement; execute() only processes one statement at a time.
+        conn.execute(text(f'DROP TABLE IF EXISTS "{tmp_table}"'))
+
+        # Report row count in the target table after upsert.
         try:
-            res = conn.execute(text(f"SELECT COUNT(1) FROM \"{table_name}\""))
+            res = conn.execute(text(f'SELECT COUNT(1) FROM "{table_name}"'))
             total_after = int(res.scalar() or 0)
             log.info(" Upsert to %s completed; target table now has %d rows (total)", table_name, total_after)
         except SQLAlchemyError:
